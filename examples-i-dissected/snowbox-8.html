@@ -1,0 +1,1733 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>SnowBox | Sculpt and share your own snowthingie</title>
+		<link rel="shortcut icon" href="favicon.ico">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<meta property="og:url" content="http://127.0.0.1"/>
+		<meta property="og:title" content="SnowBox"/> 
+		<meta property="og:description" content="SnowBox | Sculpt and share your own snowthingie."/> 
+		<meta property="og:image" content="http://snwbx.com/thumb.jpg"/> 
+		<meta name="description" content="SnowBox | Sculpt and share your own snowthingie.">
+		<meta itemprop="name" content="SnowBox">
+		<meta itemprop="description" content="SnowBox | Sculpt and share your own snowthingie.">
+		<meta itemprop="image" content="thumb.jpg">
+
+		<style>
+			*{ box-sizing: border-box; -moz-box-size: border-box; margin: 0; padding: 0 }
+			body {
+				color: #ffffff;
+				font-family: tahoma;
+				font-size:13px;
+				background-color: #222;
+				margin: 0px;
+				overflow: hidden;
+			}
+			body.loading #loading{ opacity: 1 ;}
+			#container{ position: absolute; left: 0; top: 0; right: 0; bottom: 0;}
+			#options{ position: absolute; left: 10px; top: 10px; opacity: .5; line-height: 1.4em }
+			#options ul{ list-style-type: none;}
+			a{ color: white }
+			.button{ font-family: 'Roboto Condensed'; font-weight: 300; font-size: 11px; line-height: 35px; width: 157px; border: 1px solid #8c1417; display: inline-block; text-transform: uppercase; text-align: center; text-decoration: none; border-radius: 3px; height: 37px; pointer-events: auto;}
+			.disabled{ background-color: #dedede !important; pointer-events: none;}
+			#container canvas{ position: absolute; left: 0; top: 0; width: 100%; height: 100%; bottom: 0;}
+			#loading{ position: absolute; left: 0; top: 0; right: 0; bottom: 0; color: white; background-color: #fff; text-align: center; pointer-events: none; -webkit-transition: opacity 250ms ease-out; transition: opacity 250ms ease-out, zoom 150ms ease-out; opacity: 0 ;}
+			#loading.hidden div.logo, #loading.hidden div.seal, #loading.hidden p{ opacity: 0 ;} 
+			#loading div.logo{ width: 799px; height: 531px; position: absolute; left: 50%; top: 50%; margin-left: -400px; margin-top: -265px; -webkit-transition: opacity 500ms ease-out; transition: opacity 500ms ease-out; background-repeat: no-repeat;}
+			#loading div.seal{ position: absolute; left: 50%; top: 50%; width: 144px; height: 143px; background-image: url( assets/seal.png ); margin-left: 364px; margin-top: 125px;-webkit-transition: opacity 500ms 300ms ease-out; transition: opacity 500ms 300ms ease-out}
+			#loading p{ font-family: 'Roboto Condensed'; font-weight: bold; font-size: 35px; color: transparent; position: absolute; left: 0; top: 50%; margin-top: 240px; right: 0; text-align: center; -webkit-transition: opacity 300ms 600ms ease-out; transition: opacity 300ms 600ms ease-out;
+		  background: url( assets/pattern.png );
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; text-fill-color: transparent;
+-webkit-text-stroke-width: .25px;
+-webkit-text-stroke-color: #808181;}
+			#footer{ position: absolute; left: 0; bottom: 0; right: 0; height: 60px; background-color: black; background-image: url( assets/footer-bkg.png ); background-repeat: repeat-x; background-position: 50% 0; color: #4c4b4a; text-transform: uppercase; text-align: center; font-weight: bold; line-height: 1em;}
+			#footer span{ color: #be1a1e; font-weight: normal;}
+			#footer p.main{ font-family: 'Roboto Condensed'; font-size: 12px; margin-top: 17px;}
+			#footer p.intro{ font-family: 'Roboto'; font-size: 8px; margin-top: 8px;}
+			#footer .social{ position: absolute; right: 20px; bottom: 20px;}
+			#footer a{ color: #c7bbae; text-decoration: none;}
+			#footer a:hover{ color: #ffffff;}
+			#frost{ position: absolute; left: 0; bottom: 51px; right: 0; height: 19px; background-image: url( assets/frost.png ); background-repeat: repeat-x;}
+			#options-bar{ position: absolute; top: 10px; right: 10px; list-style-type: none; -webkit-transition: -webkit-transform 800ms 400ms ease-out; transition: transform 800ms 400ms ease-out;}
+			#options-bar li{ float: left;}
+			#options-bar li a{ display: block; height: 37px; background-image: url( assets/buttons.png ); background-repeat: no-repeat; background-position: 0 0;}
+			#options-bar li:nth-child(1) a{ width: 40px;}
+			#options-bar li:nth-child(2){ background-image: url( assets/buttons.png); background-position: -40px 0; width: 1px; height: 37px;}
+			#options-bar li:nth-child(3) a{ width: 39px; background-position: -41px 0; margin-right: 2px;}
+			#options-bar li:nth-child(4) a{ width: 37px; background-position: -82px 0; margin-right: 2px;}
+			#options-bar li:nth-child(5) a{ width: 119px; background-position: -121px 0; margin-right: 2px;}
+			#options-bar li:nth-child(6) a{ width: 37px; background-position: -240px 0;}
+			#options-bar li:nth-child(1) a:hover{ background-position: 0 -37px; }
+			#options-bar li:nth-child(3) a:hover{ background-position: -41px -37px; }
+			#options-bar li:nth-child(4) a:hover{ background-position: -82px -37px; }
+			#options-bar li:nth-child(5) a:hover{ background-position: -121px -37px;}
+			#options-bar li:nth-child(6) a:hover{ background-position: -240px -37px;}
+			#options-bar.collapsed{ -webkit-transform: translateY( -400px ); transform: translateY( -400px );}
+			#tools-bar{ position: absolute; left: 50%; margin-left: -391px; width:781px; height:54px; background-image: url( assets/platform.png ); bottom: 70px; -webkit-transition: -webkit-transform 800ms ease-out, zoom 150ms ease-out, bottom 150ms ease-out; transition: transform 800ms 400ms ease-out, zoom 150ms ease-out, bottom 150ms ease-out}
+			#tools-bar ul{ position: absolute; left: 50%; bottom: 32px; height: 96px; list-style-type: none; margin-left: -366px; }
+			#tools-bar li{ position: relative; margin-top: 20px; float: left; background-image: url( assets/tools.png ); background-repeat: no-repeat; height: 76px; margin-right: 26px; cursor:pointer; -webkit-transition: height 100ms ease-out, margin 100ms ease-out }
+			#tools-bar li span{ height: 29px; background-image: url( assets/shadow.png ); background-repeat: no-repeat; display:block; position: absolute; left: 0; bottom: -10px; -webkit-transition: bottom 100ms ease-out, -webkit-transform 100ms ease-out; transition: bottom 100ms ease-out, transform 100ms ease-out;}
+			#tools-bar.collapsed{ -webkit-transform: translateY( 400px ); transform: translateY( 400px );}
+			.tool-snow{ width: 55px; }
+			.tool-hat{ width: 57px; background-position: -55px 0; }
+			.tool-bowtie{ width: 63px; background-position: -112px 0; }
+			.tool-button{ width: 50px; background-position: -175px 0; }
+			.tool-carrot{ width: 60px; background-position: -225px 0; }
+			.tool-tie{ width: 56px; background-position: -285px 0; }
+			.tool-pebble{ width: 48px; background-position: -341px 0; }
+			.tool-moustache{ width: 66px; background-position: -389px 0; }
+			.tool-twig{ width: 61px; background-position: -455px 0; }
+			.tool-snow span{ width: 55px; }
+			.tool-hat span{ width: 57px; background-position: -55px 0; }
+			.tool-bowtie span{ width: 63px; background-position: -112px 0; }
+			.tool-button span{ width: 50px; background-position: -175px 0; }
+			.tool-carrot span{ width: 60px; background-position: -225px 0; }
+			.tool-tie span{ width: 56px; background-position: -285px 0; }
+			.tool-pebble span{ width: 48px; background-position: -341px 0; }
+			.tool-moustache span{ width: 66px; background-position: -389px 0; }
+			.tool-twig span{ width: 61px; background-position: -455px 0; }
+			#tools-bar li:hover, #tools-bar li.active{ height: 96px; margin-top: 0;}
+			#tools-bar li:hover span, #tools-bar li.active span{ bottom: -15px; -webkit-transform: scale( 1.2, 1.2 ); transform: scale( 1.2, 1.2 );}
+			#tools-bar li div{ position: absolute; left: 50%; margin-left: -4px; bottom: -10px; width: 9px; height: 9px; border-radius: 9px; background-color: #c81b20; -webkit-transition: opacity 200ms ease-out; transition: opacity 200ms ease-out; opacity: 0;}
+			 #tools-bar li.active div{ opacity: 1; }
+			.help{ position: absolute; left: 10px; bottom: 0; width: 100px; background-color: #bb191d; color: black; font-family: 'Roboto'; font-weight: bold; text-transform: uppercase; font-size: 9px; text-align: center; border-top-right-radius: 5px; border-top-left-radius: 5px; color: #52090c; -webkit-transition: -webkit-transform 250ms ease-out; transition: transform 250ms ease-out }
+			.help div.close{ position: absolute; right: -13px; top: -14px; width: 26px; height: 30px; background-image: url( assets/close.png ); cursor: pointer; -webkit-transition: opacity 500ms ease-out; transition: opacity 500ms ease-out; opacity: 1;}
+			.help li{ padding: 20px 0; border-bottom: 1px dashed #d85f62;}
+			.help li:nth-child(2n){ background-color: #c71b1f;}
+			.help li div{ width: 71px; height: 70px; background-image: url( assets/mouse-help.png ); margin-left: 15px;}
+			.help li.place-object div{}
+			.help li.scroll-zoom div{ background-position: -71px 0;}
+			.help li.rotate div{background-position: -150px 0;}
+			.help li.scroll-size div{background-position: -224px 0;}
+			#editor-help{ -webkit-transition: -webkit-transform 400ms 1200ms ease-out; transition: transform 400ms 1200ms ease-out }
+			#editor-help.collapsed{ -webkit-transform: translateY( 450px ); transform: translateY( 470px ); cursor: pointer;}
+			#editor-help.collapsed div.close{ pointer-events: none; opacity: 0;}
+			#editor-help.hidden{ -webkit-transform: translateY( 550px ); transform: translateY( 550px ); ;}
+			#small-logo{ position: absolute; left: 15px; top: 10px; width: 70px; height: 46px; background-image: url( assets/small-logo.png ); background-repeat: no-repeat; }
+			#share-panel{ position: absolute; left: 0; top: 0; right: 0; height: 120px; background-image: url( assets/red-pattern.png ); -webkit-transition: -webkit-transform 250ms ease-out; transition: transform 250ms ease-out;}
+			#share-panel p{ font-family: "Roboto Condensed"; font-weight: bold; color: #52090c; font-size: 12px; text-transform: uppercase; text-align: center; margin-bottom: 17px;}
+			#share-panel .panel a{ width: 138px; margin-right: 3px ;}
+			#share-panel div.panel{ position: absolute; left: 50%; margin-left: -400px; top: 20px; width: 840px;}
+			#share-frost{ position: absolute; left: 0; bottom: -10px; right: 0; height: 19px; background-image: url( assets/frost_noshadow.png ); background-repeat: repeat-x;}
+			#share-panel.hidden{ -webkit-transform: translateY( -140px ); transform: translateY( -140px );}
+			#overlay{ position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: #fff; display: none; opacity: 0; pointer-events: none; -webkit-transition: opacity 500ms ease-out; transition: opacity 500ms ease-out;}
+			#overlay *{ pointer-events: inherit; }
+			#overlay.visible{ display: block; opacity: .5; pointer-events: auto;}
+			#downloadBtn{ background-color: #c91b20;}
+			#shareFacebookBtn{ background-color: #1072d5;}
+			#shareTwitterBtn{ background-color: #20c2ea }
+			#downloadBtn:hover{ background-color: #df252a; }
+			#shareFacebookBtn:hover{ background-color: #157de4; }
+			#shareTwitterBtn:hover{ background-color: #10cbfa; }
+			#share-panel input{ width: 358px; height: 37px; border: 1px solid #8a1317; border-radius: 3px; line-height: 0; padding: 0; margin-right: 7px; background-color: rgba( 0,0,0,.1 ); font-family: "Roboto Condensed"; font-weight: bold; font-size: 11px; color: white; padding: 0 15px;}
+			#share-panel input:focus { outline:none; }
+			#share-panel .stamp{ width: 177px; background-image: url( assets/bw-stamp.png ); background-repeat: no-repeat; position: absolute; left: 50%; top: -15px; margin-left: 305px; bottom: 0; opacity: .2; }
+			#closeShareBtn{ position: absolute; left: 50%; bottom: -15px; margin-left: -13px; width: 26px; height: 30px; background-image: url( assets/close.png ); cursor: pointer; }
+			#intro-text{ position: absolute; left: 50%; top: 50%; width: 700px; height: 300px; margin-left: -350px; margin-top: -140px; background-image: url( assets/red-pattern.png ); background-repeat: repeat-all; border-radius: 3px ; -webkit-transform: translateY( -60px ); transform: translateY( -60px ); opacity: 0; -webkit-transition: -webkit-transform 250ms ease-out, opacity 250ms ease-out; transition: transform 250ms ease-out, opacity 250ms ease-out; pointer-events: none;}
+			#intro-text h1{ font-family: "Roboto Condensed"; font-weight: bold; font-size: 12px; color: #fff; text-transform: uppercase; margin-bottom: 15px; }
+			#intro-text p{ font-family: "Roboto Condensed"; font-weight: 300; font-size: 16px; color: #000; line-height: 40px;}
+			#intro-text p span{ display: block; float: left; margin-right: 10px; width: 32px; height: 40px; background-image: url( assets/intro-icons.png ); background-repeat: no-repeat;}
+			#intro-text p:nth-child(2) span{ background-position: 0 0;}
+			#intro-text p:nth-child(3) span{ background-position: -32px 0;}
+			#intro-text p:nth-child(4) span{ background-position: -64px 0;}
+			#intro-text .button{ background-color: #c91b20; margin-top: 30px; }
+			#intro-text .button:hover{ background-color: #df252a; }
+			#intro-text div.content{ position: absolute; left: 187px; top: 45px; width: 500px; }
+			#intro-frost{ position: absolute; left: 0; top: -10px; right: 0; height: 19px; background-image: url( assets/frost.png ); background-repeat: repeat-x;}
+			#intro-text div.seal{ position: absolute; left: 550px; top: 150px; width: 150px; height: 150px; background-image: url( assets/bw-stamp.png ); background-repeat: no-repeat; opacity: .2; }
+			#intro-text div.pics{ position: absolute; width: 296px; height: 367px; left: -135px; top: -30px; background-image: url( assets/pics.png ); background-repeat: no-repeat;}
+			#intro-text.visible{ -webkit-transform: translateY( 0 ); transform: translateY( 0 ); opacity: 1; pointer-events:auto;}
+			#intro-text *{ pointer-events: inherit; }
+			@media (max-width: 800px) {
+				#loading{ zoom: .75 ;}
+				#tools-bar{ zoom: .75; bottom: 100px;}
+			}
+			@media (max-width: 600px) {
+				#loading{ zoom: .5 ;}
+				#tools-bar{ zoom: .5; bottom: 150px;}
+			}
+		</style>
+	
+	</head>
+	<body class="loading">
+
+		<div id="fb-root"></div>
+	
+
+		<div id="container"></div>
+		
+		<!--<div id="tools" >
+			<p>
+				<a href="#" class="button" id="loadFromHashBtn">Load from Hash</a>
+				<a href="#" class="button" id="loadFromLocalStorageBtn">Load from Disk</a>
+			</p>
+			<ul></ul>
+		</div>-->
+
+		<ul id="options-bar" class="collapsed">
+			<li><a href="#" id="plusBtn"></a></li>
+			<li></li>
+			<li><a href="#" id="minusBtn"></a></li>
+			<li><a href="#" id="undoBtn"></a></li>
+			<li><a href="#" id="snapshotBtn"></a></li>
+			<li><a href="#" id="fullscreenBtn"></a></li>
+		</ul>
+
+		<div id="tools-bar" class="collapsed">
+			<ul></ul>
+		</div>
+
+		<div id="small-logo"></div>
+
+		<div id="overlay" ></div>
+
+		<div id="share-panel" class="hidden">
+			<div class="stamp" ></div>
+			<div class="panel">
+				<p>Share your creation</p>
+				<input type="text" value="" id="urlInput" ></input>
+				<a href="#" id="downloadBtn" class="button" >Download</a>
+				<a href="#" id="shareTwitterBtn" class="button" >Share on Twitter</a>
+				<a href="#" id="shareFacebookBtn" class="button" >Share on Facebook</a>
+			</div>
+			<div id="share-frost" ></div>
+			<a href="#" id="closeShareBtn" ></a>
+		</div>
+
+		<div id="intro-text">
+			<div class="content">
+				<h1>Welcome to SnowBox!</h1>
+				<p><span></span>Click on the ground to start sculpting in the snow!</p>
+				<p><span></span>Select different objects from the bottom to improve your creation!</p>
+				<p><span></span>Take a snapshot and share it with your friends!</p>
+				<a href="#" class="button" id="enterBtn" >Understood, let me in</a>
+			</div>
+			<div class="seal" ></div>
+			<div id="intro-frost" ></div>
+			<div class="pics"></div>
+		</div>
+
+		<div id="loading" class="hidden">
+			<div class="seal" ></div>
+			<div class="logo"></div>
+			<p>Sculpt and share your own snowthingie</p>
+		</div>
+
+		<div id="footer">
+			<p class="main"><span>SnowBox</span> - Sculpt and share your own snowthingie</p>
+			<p class="intro">SnowBox is a Christmas experiment - <a href="http://www.twitter.com/claudioguglieri" rel="external" >@claudioguglieri</a> <a href="http://www.twitter.com/Sejnulla" rel="external" >@Sejnulla</a> <a href="http://www.twitter.com/thespite" rel="external" >@thespite</a></p>
+
+			<div class="social" >
+				<a href="https://twitter.com/share" class="twitter-share-button" data-lang="en" data-text="SnowBox | Sculpt and share your own snowthingie by @claudioguglieri @Sejnulla and @thespite" data-url="http://www.snwbx.com">Tweet</a>
+
+				
+				
+				<div class="g-plusone" data-size="medium" data-annotation="bubble"></div>
+				
+				<div class="fb-like" data-href="http://snwbx.com/" data-colorscheme="light" data-layout="button_count" data-action="like" data-show-faces="true" data-send="false"></div>
+			</div>
+
+		</div>
+		<div id="frost"></div>
+
+		<div id="editor-help" class="hidden help">
+			<ul>
+				<li class="place-object"><div></div>Place objects</li>
+				<li class="scroll-zoom"><div></div>Scroll to zoom</li>
+				<li class="rotate"><div></div>Rotate</li>
+				<li class="scroll-size"><div></div>Size of object</li>
+				<div class="close" ></div>
+			</ul>
+		</div>
+
+<script src="Three.js"></script>
+<script src="MarchingCubes.js"></script>
+<script src="Stats.js"></script>
+<script src="ThreeRenderStats.js"></script>
+<script src="ImprovedNoise.js"></script>
+<script src="keymaster.js"></script>
+<script src="OBJLoader.js"></script>
+<script src="canvas-toBlob.min.js"></script>
+
+<script type="x-shader/x-vertex" id="rim-vs">
+
+	varying vec3 vNormal;
+	varying vec3 vEye;
+
+	void main() {
+
+		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+		vNormal = normalize( normalMatrix * normal );
+		vEye = ( modelViewMatrix * vec4( position, 1.0 ) ).xyz;
+
+	}
+
+</script>
+
+<script type="x-shader/x-fragment" id="rim-fs">
+
+	varying vec3 vNormal;
+	varying vec3 vEye;
+
+	void main() {
+	
+		float f = 2. * abs( dot( vNormal, normalize( vEye ) ) );
+		f = .2 * ( 1. - smoothstep( 0.0, 1., f ) );
+		gl_FragColor = vec4( .78, 0.105, .125, 5. * f );
+
+	}
+
+</script>
+
+<script type="x-shader/x-vertex" id="vertexShader">
+
+	varying vec3 vNormal;
+    varying vec4 vPosition;
+    varying vec4 vOPosition;
+	varying vec3 vONormal;
+    varying vec3 vU;
+    varying vec3 vEye;
+
+    void main() {
+
+        vOPosition = modelViewMatrix * vec4( position, 1.0 );
+        gl_Position = projectionMatrix * vOPosition;
+
+        vU = normalize( vec3( modelViewMatrix * vec4( position, 1.0 ) ) );
+
+        vPosition = vec4( position, 1.0 );
+        vNormal = normalMatrix * normal;
+        vONormal = normal;
+
+    }
+
+	</script>
+	
+	<script type="x-shader/x-vertex" id="fragmentShader">
+	
+	uniform sampler2D textureMap;
+    uniform sampler2D normalMap;
+    uniform vec3 color;
+    uniform float normalScale;
+    uniform float texScale;
+    uniform float useSSS;
+    uniform float useScreen;
+    uniform float attenuate;
+
+    varying vec3 vNormal;
+    varying vec4 vPosition;
+    varying vec4 vOPosition;
+	varying vec3 vONormal;
+	varying vec3 vU;
+    varying vec3 vEye;
+
+	float random(vec3 scale,float seed){return fract(sin(dot(gl_FragCoord.xyz+seed,scale))*43758.5453+seed);}
+
+    void main() {
+
+        vec3 n = normalize( vONormal.xyz );
+        vec3 blend_weights = abs( n );
+        blend_weights = ( blend_weights - 0.2 ) * 7.;  
+        blend_weights = max( blend_weights, 0. );
+        blend_weights /= ( blend_weights.x + blend_weights.y + blend_weights.z );
+
+        vec2 coord1 = vPosition.yz * texScale;
+        vec2 coord2 = vPosition.zx * texScale;
+        vec2 coord3 = vPosition.xy * texScale;
+
+        vec3 bump1 = texture2D( normalMap, coord1 ).rgb;  
+        vec3 bump2 = texture2D( normalMap, coord2 ).rgb;  
+        vec3 bump3 = texture2D( normalMap, coord3 ).rgb; 
+
+        vec3 blended_bump = bump1 * blend_weights.xxx +  
+                            bump2 * blend_weights.yyy +  
+                            bump3 * blend_weights.zzz;
+
+        vec3 tanX = vec3( vNormal.x, -vNormal.z, vNormal.y);
+        vec3 tanY = vec3( vNormal.z, vNormal.y, -vNormal.x);
+        vec3 tanZ = vec3(-vNormal.y, vNormal.x, vNormal.z);
+        vec3 blended_tangent = tanX * blend_weights.xxx +  
+                               tanY * blend_weights.yyy +  
+                               tanZ * blend_weights.zzz; 
+
+        vec3 normalTex = blended_bump * 2.0 - 1.0;
+        normalTex.xy *= normalScale;
+        normalTex.y *= -1.;
+        normalTex = normalize( normalTex );
+        mat3 tsb = mat3( normalize( blended_tangent ), normalize( cross( vNormal, blended_tangent ) ), normalize( vNormal ) );
+        vec3 finalNormal = tsb * normalTex;
+
+        vec3 r = reflect( normalize( vU ), normalize( finalNormal ) );
+        float m = 2.0 * sqrt( r.x * r.x + r.y * r.y + ( r.z + 1.0 ) * ( r.z + 1.0 ) );
+        vec2 calculatedNormal = vec2( r.x / m + 0.5,  r.y / m + 0.5 );
+
+        vec3 base = texture2D( textureMap, calculatedNormal ).rgb;
+
+		float rim = 1.75 * max( 0., abs( dot( normalize( vNormal ), normalize( -vOPosition.xyz ) ) ) );
+		base += useSSS * color * ( 1. - .75 * rim );
+		base += ( 1. - useSSS ) * 10. * base * color * clamp( 1. - rim, 0., .15 );
+
+		if( useScreen == 1. ) {
+			base = vec3( 1. ) - ( vec3( 1. ) - base ) * ( vec3( 1. ) - base );
+		}
+
+		float nn = .05 * random( vec3( 1. ), length( gl_FragCoord ) );
+        base += vec3( nn );
+
+        float a = 1.;
+        if( attenuate == 1. ) {
+        	a = 1. - length( vPosition ) / 500.;
+        	a *= 5.;
+        }
+
+        gl_FragColor = vec4( base.rgb, a );
+
+    }
+	
+	</script>
+
+	<script type="x-shader/x-vertex" id="model-vs">
+
+	attribute vec4 tangent;
+
+	uniform vec2 repeat;
+	uniform float useNormal;
+	uniform float useRim;
+
+	varying vec2 vUv;
+	varying vec3 vTangent;
+	varying vec3 vBinormal;
+	varying vec3 vNormal;
+	varying vec3 vEye;
+	varying vec3 vU;
+	varying vec2 vN;
+
+	void main() {
+
+		vU = normalize( vec3( modelViewMatrix * vec4( position, 1.0 ) ) );
+
+		if( useNormal == 0. ) {
+			vec3 n = normalize( normalMatrix * normal );
+			vec3 r = reflect( vU, n );
+			float m = 2.0 * sqrt( r.x * r.x + r.y * r.y + ( r.z + 1.0 ) * ( r.z+1.0 ) );
+			vN = vec2( r.x / m + 0.5,  r.y / m + 0.5 );
+		} else {
+			vN = vec2( 0. );
+		}
+
+		vUv = repeat * uv;
+		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+		vNormal = normalize( normalMatrix * normal );
+		if( useNormal == 1. ) {
+			vTangent = normalize( normalMatrix * tangent.xyz );
+			vBinormal = normalize( cross( vNormal, vTangent ) * tangent.w );
+		} else {
+			vTangent = vec3( 0. );
+			vBinormal = vec3( 0. );
+		}
+
+		if( useRim > 0. ) {
+			vEye = ( modelViewMatrix * vec4( position, 1.0 ) ).xyz;
+		} else {
+			vEye = vec3( 0. );
+		}
+
+	}
+
+	</script>
+	
+	<script type="x-shader/x-vertex" id="model-fs">
+	
+	uniform sampler2D tNormal;
+	uniform sampler2D tDiffuse;
+	uniform sampler2D tSpecular;
+	uniform sampler2D tMatCap;
+	uniform float noise;
+	uniform float useNormal;
+	uniform float useRim;
+	uniform float rimPower;
+	uniform float useScreen;
+	uniform float normalScale;
+	uniform float normalRepeat;
+	uniform float showGhost;
+
+	varying vec2 vUv;
+	varying vec3 vTangent;
+	varying vec3 vBinormal;
+	varying vec3 vNormal;
+	varying vec3 vEye;
+	varying vec3 vU;
+	varying vec2 vN;
+
+	float random(vec3 scale,float seed){return fract(sin(dot(gl_FragCoord.xyz+seed,scale))*43758.5453+seed);}
+
+	void main() {
+		
+		vec3 finalNormal = vNormal;
+		vec2 calculatedNormal = vN;
+
+		if( useNormal == 1. ) {
+			vec3 normalTex = texture2D( tNormal, vUv * normalRepeat ).xyz * 2.0 - 1.0;
+			normalTex.xy *= normalScale;
+			normalTex = normalize( normalTex );
+			mat3 tsb = mat3( normalize( vTangent ), normalize( vBinormal ), normalize( vNormal ) );
+			finalNormal = tsb * normalTex;
+
+			vec3 r = reflect( vU, normalize( finalNormal ) );
+			float m = 2.0 * sqrt( r.x * r.x + r.y * r.y + ( r.z + 1.0 ) * ( r.z+1.0 ) );
+			calculatedNormal = vec2( r.x / m + 0.5,  r.y / m + 0.5 );
+		}
+
+		vec3 base = texture2D( tDiffuse, vUv ).rgb;
+		base *= texture2D( tMatCap, calculatedNormal ).rgb;
+		float f = 2.;
+		base += 2. * texture2D( tSpecular, vUv ).r * pow( texture2D( tMatCap, calculatedNormal ).rgb, vec3( f ) );
+		
+		// rim lighting
+
+		if( useRim > 0. ) {
+			float f = rimPower * abs( dot( vNormal, normalize( vEye ) ) );
+			f = useRim * ( 1. - smoothstep( 0.0, 1., f ) );
+	        base += vec3( f );
+	    }
+
+	    // screen blending
+
+        if( useScreen == 1. ) {
+			base = vec3( 1. ) - ( vec3( 1. ) - base ) * ( vec3( 1. ) - base );
+		}
+
+        // noise 
+
+        base += noise * ( .5 - random( vec3( 1. ), length( gl_FragCoord ) ) );
+
+        if( showGhost == 1. ) {
+        	base *= vec3( 1., 0., 1. );
+        }
+
+		gl_FragColor = vec4( base, 1. );
+
+	}
+	
+	</script>
+	
+<script>
+
+'use strict';
+
+function hasWebGL() {
+
+	var canvasID = 'webgl',
+    canvas = document.createElement( 'canvas' ),
+    gl,
+    glExperimental = false;
+
+    try { gl = canvas.getContext("webgl"); }
+    catch (x) { gl = null; }
+
+    if (gl === null) {
+        try { gl = canvas.getContext("experimental-webgl"); glExperimental = true; }
+        catch (x) { gl = null; }
+    }
+
+    if(gl) { return true; }
+    return false;
+}
+
+if( !hasWebGL() ) {
+	window.location = 'snowbox.html';
+} else {
+
+	window.addEventListener( 'load', function() {
+
+		var preManager = new THREE.LoadingManager();
+		var preLoader = new THREE.ImageLoader( preManager );
+
+		preManager.onProgress = function ( item, loaded, total ) {
+			console.log( item, loaded, total );
+		};
+		preManager.onLoad = function() {
+			loading.classList.remove( 'hidden' );
+			drawProgress = initLoader();
+			init();
+		}
+		preManager.onError = function( e ) {
+			console.log( e );
+		}
+
+		preLoader.load( 'assets/big-logo.png', function( i ) { bigLogo = i; } );
+		preLoader.load( 'assets/seal.png', function() {} );
+		preLoader.load( 'assets/pattern.png', function() {} );
+		preLoader.load( 'assets/mask_loader.png', function( i ) { maskLoader = i; } );
+
+	} );
+
+}
+
+function track( category, action, label, value ) {
+
+	//ga( 'send', 'event', category, action, label, value );
+
+}
+
+[].slice.call( document.querySelectorAll( 'a[rel=external]' ), 0 ).forEach( function( a ) {
+	a.addEventListener( 'click', function( e ) {
+		window.open( this.href, '_blank' );
+		e.preventDefault();
+	}, false );
+} );
+
+var maskLoader, bigLogo;
+
+var ul = document.querySelector( '#tools ul' );
+var isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor );
+
+var toolsBar = document.querySelector( '#tools-bar ul' );
+var tools = [ 
+	{ id: 'snow', type: 'snow' },
+	{ id: 'hat', type: 'model' },
+	{ id: 'bowtie', type: 'model' },
+	{ id: 'button', type: 'model' },
+	{ id: 'carrot', type: 'model' },
+	{ id: 'tie', type: 'model' },
+	{ id: 'pebble', type: 'model' },
+	{ id: 'moustache', type: 'model' },
+	{ id: 'twig', type: 'twig', twigs: [ 'long_bend', 'long_straight', 'short_bend', 'short_straight' ], models: [] }
+];
+
+var effect, snow, snowMaterial, snowMaterial2, box, plane, ground, dome;
+var center = new THREE.Vector3( 0, 0, 0), nCenter = new THREE.Vector3( 0, 0, 0 );
+
+var debug = false;
+if( debug ) {
+	var rendererStats = new THREEx.RendererStats();
+	rendererStats.domElement.style.position = 'absolute'
+	rendererStats.domElement.style.right = '0px'
+	rendererStats.domElement.style.bottom   = '0px'
+	document.body.appendChild( rendererStats.domElement )
+}
+
+function initLoader() {
+
+	function draw( threshold ) {
+
+	    for( var j = 0; j < srcBuf8.length; j += 4 ) {
+
+	    	var c = imgBuf8[ j ] + imgBuf8[ j + 1 ] + imgBuf8[ j + 2 ];
+	    	c /= 3;
+	    	dstBuf8[ j ] = c;
+	    	dstBuf8[ j + 1 ] = c;
+	    	dstBuf8[ j + 2 ] = c;
+	    	dstBuf8[ j + 3 ] = imgBuf8[ j + 3 ];
+	    	
+	    	if( srcBuf8[ j + 3 ] > 0 ) {
+	    		if( srcBuf8[ j ] < threshold ) {
+			    	dstBuf8[ j ] = imgBuf8[ j ];
+			    	dstBuf8[ j + 1 ] = imgBuf8[ j + 1 ];
+			    	dstBuf8[ j + 2 ] = imgBuf8[ j + 2 ];
+	    		}
+	    	}
+
+	    }
+
+		dstData.data.set( dstBuf8 );
+	    resultCtx.putImageData( dstData, 0, 0 );
+
+	}
+
+	var maskCanvas = document.createElement( 'canvas' );
+	var logoCanvas = document.createElement( 'canvas' );
+	var resultCanvas = document.createElement( 'canvas' );
+	loadingLogo.appendChild( resultCanvas );
+
+	var maskCtx = maskCanvas.getContext( '2d' );
+	var logoCtx = logoCanvas.getContext( '2d' );
+	var resultCtx = resultCanvas.getContext( '2d' );
+
+	resultCanvas.width = logoCanvas.width = maskCanvas.width = maskLoader.width;
+	resultCanvas.height = logoCanvas.height = maskCanvas.height = maskLoader.height;
+	//Ctx.drawImage( bigLogo, 0, 0 );
+	maskCtx.drawImage( maskLoader, 0, 0 );
+	
+    var srcData = maskCtx.getImageData( 0, 0, maskCanvas.width, maskCanvas.height ); 
+    var srcBuf8 = new Uint8ClampedArray( srcData.data );
+
+    var imgData = logoCtx.getImageData( 0, 0, logoCanvas.width, logoCanvas.height ); 
+    var imgBuf8 = new Uint8ClampedArray( imgData.data );
+
+    var dstData = resultCtx.getImageData( 0, 0, resultCanvas.width, resultCanvas.height ); 
+    var dstBuf8 = new Uint8ClampedArray( dstData.data );
+
+    return draw;
+
+}
+
+var loading = document.getElementById( 'loading' ),
+	loadingLogo = document.querySelector( '#loading .logo' );
+var introText = document.getElementById( 'intro-text' );
+
+var container, renderer, scene, camera, mesh, fov = 90;
+var distance = 200, ndistance = 100;
+
+var loadedAssets = 0;
+var manager = new THREE.LoadingManager();
+var drawProgress;
+manager.onProgress = function ( item, loaded, total ) {
+	console.log( item, loaded, total );
+	loadedAssets = loaded;
+	drawProgress( 255 * loaded / total );
+};
+manager.onLoad = function() {
+	if( loadedAssets > 5 ) {
+		//loadHistoryFromLocalStorage();
+		introText.classList.add( 'visible' );
+		overlay.classList.add( 'visible' );
+		addToolSelector();
+		document.body.classList.remove( 'loading' );
+		render();
+	}
+}
+manager.onError = function( e ) {
+	console.log( e );
+}
+
+var matCapTexture = new THREE.Texture(),
+	snowMatCapTexture = new THREE.Texture(),
+	snowNormalTexture = new THREE.Texture();
+var loader = new THREE.ImageLoader( manager );
+var currentTwig = 0;
+
+var editorHelp = document.getElementById( 'editor-help' ),
+	closeHelpBtn = editorHelp.querySelector( '.close' );
+
+editorHelp.addEventListener( 'click', function( e ) {
+	if( e.srcElement == closeHelpBtn || e.originalTarget == closeHelpBtn ) return;
+	track( 'Core', 'Help', 'Open' );
+	this.classList.remove( 'collapsed' );
+	e.preventDefault();
+} );
+
+closeHelpBtn.addEventListener( 'click', function( e ) {
+	track( 'Core', 'Help', 'Close' );
+	editorHelp.style.webkitTransitionDelay = editorHelp.style.mozTransitionDelay = editorHelp.style.transitionDelay = '1ms';
+	editorHelp.classList.add( 'collapsed' );
+	e.preventDefault();
+} );
+
+document.getElementById( 'enterBtn' ).addEventListener( 'click', function( e ) {
+	document.getElementById( 'tools-bar' ).classList.remove( 'collapsed' );
+	document.getElementById( 'options-bar' ).classList.remove( 'collapsed' );
+	overlay.classList.remove( 'visible' );
+	introText.classList.remove( 'visible' );
+	editorHelp.classList.remove( 'hidden' );
+	e.preventDefault();
+} );
+
+function loadAssets() {
+
+	loader.load( 'assets/buttons.png', function() {} );
+	loader.load( 'assets/tools.png', function() {} );
+	loader.load( 'assets/platform.png', function() {} );
+	loader.load( 'assets/frost.png', function() {} );
+	loader.load( 'assets/footer-bkg.png', function() {} );
+	loader.load( 'assets/shadow.png', function() {} );
+	loader.load( 'assets/mouse-help.png', function() {} );
+	loader.load( 'assets/close.png', function() {} );
+
+	loader.load( 'smoothmat.jpg', function ( image ) {
+		matCapTexture.image = image;
+		matCapTexture.needsUpdate = true;
+		matCapTexture.wrapS = matCapTexture.wrapT = THREE.ClampToEdgeWrapping;
+	} );
+	loader.load( 'test.jpg', function ( image ) {
+		snowMatCapTexture.image = image;
+		snowMatCapTexture.needsUpdate = true;
+		snowMatCapTexture.wrapS = snowMatCapTexture.wrapT = THREE.ClampToEdgeWrapping;
+	} );
+	loader.load( 'snow2.jpg', function ( image ) {
+		snowNormalTexture.image = image;
+		snowNormalTexture.needsUpdate = true;
+		snowNormalTexture.wrapS = snowNormalTexture.wrapT = THREE.RepeatWrapping;
+	} );
+
+	tools.forEach( function( m ) {
+
+		switch( m.type ) {
+			case 'model':
+
+			var normalTexture = new THREE.Texture(),
+				diffuseTexture = new THREE.Texture(),
+				specularTexture = new THREE.Texture();
+
+			loader.load( 'assets/models/' + m.id + '/normal.jpg', function ( image ) {
+				normalTexture.image = image;
+				normalTexture.needsUpdate = true;
+				normalTexture.wrapS = normalTexture.wrapT = THREE.RepeatWrapping;
+			} );
+			loader.load( 'assets/models/' + m.id + '/diffuse.jpg', function ( image ) {
+				diffuseTexture.image = image;
+				diffuseTexture.needsUpdate = true;
+				diffuseTexture.wrapS = diffuseTexture.wrapT = THREE.ClampToEdgeWrapping;
+			} );
+			loader.load( 'assets/models/' + m.id + '/specular.jpg', function ( image ) {
+				specularTexture.image = image;
+				specularTexture.needsUpdate = true;
+				specularTexture.wrapS = specularTexture.wrapT = THREE.ClampToEdgeWrapping;
+			} );
+
+			var objLoader = new THREE.OBJLoader( manager )
+			objLoader.load( 'assets/models/' + m.id + '/model.obj', function( g ) {
+
+				var geometry = g.children[ 0 ].geometry;
+				geometry.computeTangents();
+
+				var material = new THREE.ShaderMaterial( {
+
+					uniforms: { 
+						tNormal: { type: 't', value: normalTexture },
+						tDiffuse: { type: 't', value: diffuseTexture },
+						tSpecular: { type: 't', value: specularTexture },
+						tMatCap: { type: 't', value: matCapTexture },
+						noise: { type: 'f', value: .04 },
+						repeat: { type: 'v2', value: new THREE.Vector2( 1, 1 ) },
+						useNormal: { type: 'f', value: 1 },
+						useRim: { type: 'f', value: .5 },
+						rimPower: { type: 'f', value: 2 },
+						useScreen: { type: 'f', value: 1 },
+						normalScale: { type: 'f', value: 1 },
+						normalRepeat: { type: 'f', value: 1 },
+						showGhost: { type: 'f', value: 0 }
+					},
+					vertexShader: document.getElementById( 'model-vs' ).textContent,
+					fragmentShader: document.getElementById( 'model-fs' ).textContent,
+					shading: THREE.SmoothShading,
+					side: THREE.DoubleSide
+					
+				} );
+
+				var mesh = new THREE.Mesh( geometry, material );
+				mesh._modelId = m.id;
+				scene.add( mesh );
+				mesh.visible = false;
+				modelIndex[ m.id ] = mesh;
+
+				m.mesh = mesh;
+
+			} );
+			break;
+
+			case 'twig' :
+
+			var normalTexture = new THREE.Texture(),
+				diffuseTexture = new THREE.Texture(),
+				specularTexture = new THREE.Texture();
+
+			loader.load( 'assets/models/twig/normal.jpg', function ( image ) {
+				normalTexture.image = image;
+				normalTexture.needsUpdate = true;
+				normalTexture.wrapS = normalTexture.wrapT = THREE.RepeatWrapping;
+			} );
+			loader.load( 'assets/models/twig/diffuse.jpg', function ( image ) {
+				diffuseTexture.image = image;
+				diffuseTexture.needsUpdate = true;
+				diffuseTexture.wrapS = diffuseTexture.wrapT = THREE.ClampToEdgeWrapping;
+			} );
+			loader.load( 'assets/models/twig/specular.jpg', function ( image ) {
+				specularTexture.image = image;
+				specularTexture.needsUpdate = true;
+				specularTexture.wrapS = specularTexture.wrapT = THREE.ClampToEdgeWrapping;
+			} );
+
+			m.twigs.forEach( function( t ) {
+
+				var objLoader = new THREE.OBJLoader( manager )
+				objLoader.load( 'assets/models/twig/' + t + '.obj', function( g ) {
+
+					var geometry = g.children[ 0 ].geometry;
+					geometry.computeTangents();
+
+					var material = new THREE.ShaderMaterial( {
+
+						uniforms: { 
+							tNormal: { type: 't', value: normalTexture },
+							tDiffuse: { type: 't', value: diffuseTexture },
+							tSpecular: { type: 't', value: specularTexture },
+							tMatCap: { type: 't', value: matCapTexture },
+							noise: { type: 'f', value: .04 },
+							repeat: { type: 'v2', value: new THREE.Vector2( 1, 1 ) },
+							useNormal: { type: 'f', value: 1 },
+							useRim: { type: 'f', value: .5 },
+							rimPower: { type: 'f', value: 2 },
+							useScreen: { type: 'f', value: 1 },
+							normalScale: { type: 'f', value: 1 },
+							normalRepeat: { type: 'f', value: 1 },
+							showGhost: { type: 'f', value: 0 }
+						},
+						vertexShader: document.getElementById( 'model-vs' ).textContent,
+						fragmentShader: document.getElementById( 'model-fs' ).textContent,
+						shading: THREE.SmoothShading,
+						side: THREE.DoubleSide
+						
+					} );
+
+					var mesh = new THREE.Mesh( geometry, material );
+					mesh._modelId = m;
+					scene.add( mesh );
+					mesh.visible = false;
+					modelIndex[ m.id ] = mesh;
+
+					m.models.push( mesh );
+
+				} );
+		
+			} );
+
+			break;
+
+		}
+
+	} );
+
+}
+
+//function Editor() {
+
+	var projector, raycaster, INTERSECTED;
+
+	var cursorMaterial = new THREE.ShaderMaterial( {
+
+		vertexShader: document.getElementById( 'rim-vs' ).textContent,
+		fragmentShader: document.getElementById( 'rim-fs' ).textContent,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false
+
+	} );
+
+	var cursor = new THREE.Mesh( new THREE.IcosahedronGeometry( 1, 3 ), cursorMaterial );
+	var surfaceCursor = new THREE.Mesh( new THREE.IcosahedronGeometry( 1, 1 ), new THREE.MeshBasicMaterial( { emissive: 0xffffff, color: 0xc91b20 } ) );
+	var cursorSize = 2;
+	var operationsHistory = [];
+	var snow = null;
+
+	var noise = new ImprovedNoise();
+
+	var modelIndex = {};
+
+var modelMaterial = new THREE.MeshNormalMaterial();
+var currentBrush = null;
+function setModelBrush( m ) {
+
+	track( 'Core', 'Brush', m?m._modelId:'snowball' );
+
+	if( currentBrush ) currentBrush.visible = false;
+	currentBrush = m;
+	if( currentBrush ) {
+		currentBrush.visible = true;
+		currentBrush.material.uniforms.showGhost.value = 0.;
+	}
+}
+
+/*document.getElementById( 'loadFromHashBtn' ).addEventListener( 'click', function( e ) {
+	loadHistoryFromHash();
+	e.preventDefault();
+} );
+
+document.getElementById( 'loadFromLocalStorageBtn' ).addEventListener( 'click', function( e ) {
+	loadHistoryFromLocalStorage();
+	e.preventDefault();
+} );*/
+
+function addToolSelector() {
+
+	tools.forEach( function( i ) {
+
+		var li = document.createElement( 'li' );
+		li.className = 'tool-' + i.id;
+		var span = document.createElement( 'span' );
+		li.appendChild( span );
+		var div = document.createElement( 'div' );
+		li.appendChild( div );
+		var handler = null;
+		switch( i.type ) {
+			case 'snow':
+				li.classList.add( 'active' );
+				handler = function() { setModelBrush( null ); };
+				break;
+			case 'model':
+				handler = function() { setModelBrush( i.mesh ); }
+				break;
+			case 'twig':
+				handler = function() { 
+					setModelBrush( i.models[ currentTwig ] ); 
+					currentTwig++; 
+					currentTwig %= i.models.length;
+				}
+				break;
+		}
+		li.addEventListener( 'click', function( e ) {
+			handler();
+			[].forEach.call( toolsBar.querySelectorAll( 'li' ), function( i ) {
+				i.classList.remove( 'active' );
+			} );
+			li.classList.add( 'active' );
+			e.preventDefault();
+			return false;
+		} );
+		toolsBar.appendChild( li );
+
+	} );
+
+}
+
+function uploadToImgur( canvas, callback ) {
+
+	var cid = 'fee533724cf5751';
+	var imagefile;
+
+	try {
+		imagefile = canvas.toDataURL('image/jpeg', 1.0).split(',')[1];
+	} catch(e) {
+		imagefile = canvas.toDataURL().split(',')[1];
+	}
+
+	function uploadFinish( e ) {
+		console.log( 'finish', Date.now(), e );
+	}
+
+	function uploadProgress( e ) {
+		console.log( 'upload', Date.now(), e );
+	}
+
+	function uploadError( e ) {
+		console.log( 'error', Date.now(), e );
+	}
+
+	function uploadComplete( e ) {
+		//console.log( Date.now(), e, oXHR );
+		//console.log( JSON.parse( oXHR.responseText ) );
+		callback( JSON.parse( oXHR.responseText ) );
+	}
+
+    var fd = new FormData();
+    fd.append( 'key', cid );
+    fd.append( 'image', imagefile );
+    fd.append( 'type', 'base64' );
+    fd.append( 'name', 'test.jpg' );
+    fd.append( 'title', 'test title' );
+    fd.append( 'caption', 'test caption' );
+
+    var url = 'https://api.imgur.com/';
+    url = 'https://imgur-apiv3.p.mashape.com/';
+
+	var oXHR = new XMLHttpRequest();
+	oXHR.addEventListener( 'loadstart', uploadFinish, false );
+	oXHR.addEventListener( 'progress', uploadProgress, false );
+	oXHR.addEventListener( 'error', uploadError, false );
+	oXHR.addEventListener( 'load', uploadComplete, false );
+	oXHR.open( 'POST', url + '3/image', true );
+	oXHR.setRequestHeader( 'Authorization', 'Client-ID ' + cid );
+	oXHR.setRequestHeader( 'X-Mashape-Authorization', 'V0CojE1ZL2Ug2ffgFJ4DH1PwVKXdQ9Aw' );
+	oXHR.send( fd );
+
+}
+
+document.getElementById( 'plusBtn' ).addEventListener( 'click', function( e ) {
+	cursorSize += 1;
+	track( 'Core', 'Size', 'More' );
+	e.preventDefault();
+} );
+
+document.getElementById( 'minusBtn' ).addEventListener( 'click', function( e ) {
+	cursorSize -= 1;
+	track( 'Core', 'Size', 'Less' );
+	e.preventDefault();
+} );
+
+document.getElementById( 'undoBtn' ).addEventListener( 'click', function( e ) {
+	undo(),
+	e.preventDefault();
+} );
+
+var overlay = document.getElementById( 'overlay' ),
+	sharePanel = document.getElementById( 'share-panel' ),
+	downloadBtn = document.getElementById( 'downloadBtn' ),
+	shareTwitterBtn = document.getElementById( 'shareTwitterBtn' ),
+	shareFacebookBtn = document.getElementById( 'shareFacebookBtn' ),
+	urlInput = document.getElementById( 'urlInput' ),
+	watermark = new Image();
+watermark.src = 'assets/small-logo.png';
+
+document.getElementById( 'snapshotBtn' ).addEventListener( 'click', function( e ) {
+	
+	urlInput.value = 'Uploading... We\'ll be done in a jiffy';
+	overlay.classList.add( 'visible' );
+	sharePanel.classList.remove( 'hidden' );
+	
+	downloadBtn.classList.add( 'disabled' );
+	shareTwitterBtn.classList.add( 'disabled' );
+	shareFacebookBtn.classList.add( 'disabled' );
+
+	setTimeout( function() {
+
+		var name = 'snowbox-' + Date.now();
+
+		var canvas = document.createElement( 'canvas' );
+		canvas.width= renderer.domElement.width;
+		canvas.height = renderer.domElement.height;
+		var ctx = canvas.getContext( '2d' );
+		var src = renderer.domElement;
+
+		box.children[ 0 ].visible = false;
+		box.children[ 1 ].visible = false;
+		if( currentBrush ) currentBrush.visible = false;
+		cursor.visible = false;
+		surfaceCursor.visible = false;
+		renderer.render( scene, camera );	
+		box.children[ 0 ].visible = true;
+		box.children[ 1 ].visible = true;
+		if( currentBrush ) currentBrush.visible = true;
+		cursor.visible = true;
+		surfaceCursor.visible = true;
+
+		var baseUrl = 'http://127.0.0.1';
+		ctx.drawImage( src, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height );
+		ctx.drawImage( watermark, 10, 10 );
+
+		uploadToImgur( canvas, function( res ) { 
+			
+			console.log( res );
+			//urlInput.value = res.data.link;
+			track( 'Core', 'Imgur', res.data.link );
+
+			var url = baseUrl + 's/' + res.data.id;
+			urlInput.value = url;
+
+			shareFacebookBtn.onclick = function( e ) {
+
+				track( 'Core', 'Share', 'Facebook' );
+				window.open( 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent( url ), 'facebook-share-dialog', 'width=626,height=436'); 
+				return false;
+			}
+			shareFacebookBtn.classList.remove( 'disabled' );
+
+			shareTwitterBtn.onclick = function( e ) {
+
+				track( 'Core', 'Share', 'Twitter' );
+				var msg = 'Sculpt and share your own snowthingie at http://snwbx.com - ' + url + ' #snwbx';
+				window.open( 'https://twitter.com/intent/tweet?original_referer=' + encodeURIComponent( baseUrl ) + '&text=' + encodeURIComponent( msg ), 'twitter-share-dialog', 'width=626,height=436'); 
+				return false;
+			}
+			shareTwitterBtn.classList.remove( 'disabled' );
+
+		} );
+
+		if( isSafari ) {
+			var data = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+			downloadBtn.setAttribute( 'href', data );
+			downloadBtn.classList.remove( 'disabled' );
+		} else {
+			canvas.toBlob( function(blob) {
+				var url;
+				if( window.webkitURL ) {
+					url = window.webkitURL.createObjectURL( blob );
+				} else {
+					url = URL.createObjectURL(blob);
+				}
+				downloadBtn.setAttribute( 'download', name );
+				downloadBtn.setAttribute( 'href', url );
+				downloadBtn.classList.remove( 'disabled' );
+			} );
+		}
+
+	}, 500 );
+
+	e.preventDefault();
+
+} );
+
+downloadBtn.addEventListener( 'click', function( e ) {
+	track( 'Core', 'Share', 'Download' );
+} );
+
+document.getElementById( 'closeShareBtn' ).addEventListener( 'click', function( e ) {
+
+	overlay.classList.remove( 'visible' );
+	sharePanel.classList.add( 'hidden' );
+	e.preventDefault();
+
+} );
+
+document.getElementById( 'fullscreenBtn' ).addEventListener( 'click', function( e ) {
+
+	track( 'Core', 'Fullscreen', '' );
+
+	document.body.onwebkitfullscreenchange = function(e) {
+		document.body.onwebkitfullscreenchange = function() {
+		};
+	};
+	document.body.onmozfullscreenchange = function(e) {
+		document.body.onmozfullscreenchange = function() {
+		};
+	};
+	if( document.body.webkitRequestFullScreen ) document.body.webkitRequestFullScreen( Element.ALLOW_KEYBOARD_INPUT );
+	if( document.body.mozRequestFullScreen ) document.body.mozRequestFullScreen();
+	e.preventDefault();
+
+} );
+
+
+function undo() {
+
+	track( 'Core', 'Undo', '' );
+
+	var action = operationsHistory.pop();
+	if( !action ) return;
+	switch( action.type ) {
+		case 'ball':
+    	updateMesh();
+    	break;	
+    	case 'object':
+    	scene.remove( action.mesh );
+    	break;
+    }
+    updateHistory();
+}
+
+function updateHistory() {
+	return;
+	var summary = [];
+	operationsHistory.forEach( function( e ) {
+		var s = { type: e.type, position: { x: e.x, y: e.y, z: e.z } };
+		if( e.type == 'object' ) {
+			s.normal = { x: e.nx, y: e.ny, z: e.nz };
+			s.scale = e.scale;
+			s.id = e.id;
+		}
+		if( e.type == 'ball' ) {
+			s.size = e.size;
+		}
+		summary.push( s );
+	} );
+	localStorage[ 'snowman' ] = JSON.stringify( summary );
+
+}
+
+function loadHistory( summary ) {
+
+	summary.forEach( function ( e ) { 
+		switch( e.type ) {
+			case 'ball':
+			addSnowball( e.position.x, e.position.y, e.position.z, e.size );
+			break;
+			case 'object':
+			addModel( 
+				modelIndex[ e.id ], 
+				e.position.x, e.position.y, e.position.z,
+				e.normal.x, e.normal.y, e.normal.z,
+				e.scale
+			);
+			break;
+		}
+	} );
+	updateMesh();
+
+}
+
+function loadHistoryFromLocalStorage() {
+
+	var summary = JSON.parse( localStorage[ 'snowman' ] );
+	loadHistory( summary );
+
+}
+
+function loadHistoryFromHash() {
+
+	var hash = window.location.hash.substr( 1 );
+	summary = JSON.parse( atob( hash ) );
+	loadHistory( summary );
+
+}
+
+function init() {
+
+	loadAssets();
+	//addModelSelector();
+	//addTwigSelector();
+	//addSnowSelector();
+
+	projector = new THREE.Projector();
+	raycaster = new THREE.Raycaster();
+
+	container = document.getElementById( 'container' );
+	
+	scene = new THREE.Scene();
+	scene.position = new THREE.Vector3( 0,0,0 );
+
+	camera = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 10, 1500 );
+	camera.position.z = 100;
+	camera.target = new THREE.Vector3( 0, 0, 0 );
+
+	scene.add( camera );
+
+	renderer = new THREE.WebGLRenderer( { antialias: true });
+	renderer.setClearColor( 0xffffff, 1 );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.sortObjects = false;
+
+	container.appendChild( renderer.domElement );
+
+	container.addEventListener( 'mousewheel', onMouseWheel, false );
+	container.addEventListener( 'DOMMouseScroll', onMouseWheel, false);
+	window.addEventListener( 'resize', onWindowResize, false );
+
+	container.addEventListener( 'mousedown', onTouchStart );
+    container.addEventListener( 'touchstart', onTouchStart );
+
+    key('⌘+z, ctrl+z', function(){ 
+    	undo();
+    } );
+
+    function onTouchStart( event ) {
+
+    	var x, y;
+    	hasMouseMoved = false;
+
+        if( event.changedTouches ) {
+            x = event.changedTouches[ 0 ].pageX;
+            y = event.changedTouches[ 0 ].pageY;
+        } else {
+            x = event.clientX;
+            y = event.clientY;
+        }
+
+		isUserInteracting = true;
+
+		onPointerDownPointerX = x;
+		onPointerDownPointerY = y;
+
+		onPointerDownLon = lon;
+		onPointerDownLat = lat;
+
+       // event.preventDefault();
+    }
+
+    container.addEventListener( 'mousemove', onTouchMove );
+    container.addEventListener( 'touchmove', onTouchMove );
+
+    function onTouchMove( event ) {
+
+    	var x, y;
+    	hasMouseMoved = true;
+
+        if( event.changedTouches ) {
+            x = event.changedTouches[ 0 ].pageX;
+            y = event.changedTouches[ 0 ].pageY;
+        } else {
+            x = event.clientX;
+            y = event.clientY;
+        }
+
+		if ( isUserInteracting ) {
+				
+			nlon = ( x - onPointerDownPointerX ) * 0.1 + onPointerDownLon;
+			nlat = ( y - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
+
+		}
+		
+		mouse.x = ( x / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( y / window.innerHeight ) * 2 + 1;
+
+		event.preventDefault();
+
+    }
+
+    window.addEventListener( 'mouseup', onTouchEnd );
+    window.addEventListener( 'touchend', onTouchEnd );
+
+    function onTouchEnd( event ) {
+
+		if( intersection.length() != 0 && !hasMouseMoved ) {
+			if( currentBrush ) {
+				track( 'Core', 'Apply', currentBrush._modelId );
+				addModel( 
+					currentBrush, 
+					intersection.x, intersection.y, intersection.z,
+					intersectionNormal.x, intersectionNormal.y, intersectionNormal.z,
+					cursorSize
+				)
+			} else {
+				track( 'Core', 'Apply', 'snowball' );
+				addSnowball( 
+					( intersection.x + ( 192 / 2 ) ) / 192, ( intersection.y + ( 192 / 2 ) ) / 192, ( intersection.z + ( 192 / 2 ) ) / 192,
+					.1 * cursorSize 
+				);
+				updateMesh();
+			}
+			updateHistory();
+		}
+
+    	isUserInteracting = false;
+        event.preventDefault();
+
+    }
+
+    /*sphere = new THREE.Mesh( 
+    	new THREE.IcosahedronGeometry( 1000, 4 ), 
+    	new THREE.MeshBasicMaterial( { side: THREE.BackSide, map: THREE.ImageUtils.loadTexture( 'pano.jpg' ) } )
+    );
+    scene.add( sphere );*/
+
+	snowMaterial = new THREE.ShaderMaterial( {
+
+		uniforms: {
+            textureMap: { type: 't', value: snowMatCapTexture },
+            normalMap: { type: 't', value: snowNormalTexture },
+            normalScale: { type: 'f', value: 1.5 },
+            texScale: { type: 'f', value: 2 },
+            useSSS: { type: 'f', value: 1 },
+            useScreen: { type: 'f', value: 1 },
+            color: { type: 'c', value: new THREE.Color( 1,1,1 ) },
+            attenuate: { type: 'f', value: 0 }
+        },
+		vertexShader: document.getElementById( 'vertexShader' ).textContent,
+		fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+		shading: THREE.SmoothShading,
+		side: THREE.DoubleSide
+		
+	} );
+
+    var resolution = 50;
+	
+	effect = new THREE.MarchingCubes( resolution, snowMaterial, true, false );
+	updateMesh();
+
+	var s = 192;
+	/*box = new THREE.Mesh( new THREE.CubeGeometry( s, s, s ), new THREE.MeshBasicMaterial( { opacity: .2, map: THREE.ImageUtils.loadTexture( 'grid.png' ), transparent: true, side: THREE.BackSide, depthWrite: false } ) );
+	box.material.map.wrapS = box.material.map.wrapT = THREE.RepeatWrapping;
+	box.material.map.repeat.set( 6, 6 );*/
+
+	var mm = new THREE.MeshBasicMaterial( { color: 0xc91b20, opacity: .2, transparent: true, wireframe: true, depthTest: false } )
+	box = new THREE.Object3D();
+
+	var geometry = new THREE.Geometry();
+	geometry.vertices.push( new THREE.Vector3( -1, 0, -1 ) );
+	geometry.vertices.push( new THREE.Vector3( 1, 0, -1 ) );
+	
+	geometry.vertices.push( new THREE.Vector3( 1, 0, -1 ) );
+	geometry.vertices.push( new THREE.Vector3( 1, 0, 1 ) );
+
+	geometry.vertices.push( new THREE.Vector3( 1, 0, 1 ) );
+	geometry.vertices.push( new THREE.Vector3( -1, 0, 1 ) );
+
+	geometry.vertices.push( new THREE.Vector3( -1, 0, 1 ) );
+	geometry.vertices.push( new THREE.Vector3( -1, 0, -1 ) );
+
+	geometry.applyMatrix( ( new THREE.Matrix4() ).makeScale( .5 * s, .5 * s, .5 * s ) );
+
+	geometry.computeLineDistances();
+	var plane1 = new THREE.Line( geometry, new THREE.LineDashedMaterial( { color: 0xc91b20, dashSize: 3, gapSize: 1, linewidth: 2 } ), THREE.LinePieces );
+	plane1.rotation.y = Math.PI / 2;
+	plane1.position.y = s / 2;
+	box.add( plane1 );
+
+	var plane1 = new THREE.Line( geometry, new THREE.LineDashedMaterial( { color: 0xc91b20, dashSize: 3, gapSize: 1, linewidth: 2 } ), THREE.LinePieces );
+	plane1.rotation.y = Math.PI / 2;
+	plane1.position.y = -s / 2 + 20;
+	box.add( plane1 );
+
+	scene.add( box );
+
+	snowMaterial2 = new THREE.ShaderMaterial( {
+
+		uniforms: {
+            textureMap: { type: 't', value: snowMatCapTexture },
+            normalMap: { type: 't', value: snowNormalTexture },
+            normalScale: { type: 'f', value: .5 },
+            texScale: { type: 'f', value: .025 },
+            useSSS: { type: 'f', value: 1 },
+            useScreen: { type: 'f', value: 1 },
+            color: { type: 'c', value: new THREE.Color( 1,0,1 ) },
+            attenuate: { type: 'f', value: 1 }
+        },
+		vertexShader: document.getElementById( 'vertexShader' ).textContent,
+		fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+		shading: THREE.SmoothShading,
+		side: THREE.DoubleSide,
+		transparent: true
+
+	} );
+
+	plane = new THREE.Mesh( new THREE.PlaneGeometry( 1000, 1000, 100, 100 ), snowMaterial2 );
+	plane.rotation.x = Math.PI / 2;
+	plane.position.y = -100;
+
+	var v, n = new THREE.Vector3( 0, 0, 0 ), nn;
+	for( var j = 0; j < plane.geometry.vertices.length; j++ ) {
+		v = plane.geometry.vertices[ j ];
+		n.set( v.x, v.y, v.z );
+		n.normalize();
+		s = .002 * Math.PI;
+		nn = 40 * noise.noise( s * v.x, s * v.y, s * 10 );
+		s = .2 * Math.PI;
+		nn += 2 * noise.noise( s * v.x, s * v.y, s * 10 );
+		nn *= .001 * Math.sqrt( v.x * v.x + v.z * v.z );
+		nn = 4 * nn;
+		v.z += nn;
+	}
+
+	plane.geometry.verticesNeedUpdate = true;
+    plane.geometry.computeFaceNormals();
+
+    ground = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0xf4f6f9, depthWrite: false } ) );
+ 	ground.rotation.x = -Math.PI / 2;
+	ground.position.y = -94;
+
+    dome = new THREE.Mesh( new THREE.CylinderGeometry( 1000, 1000, 1000, 36, 1, true ), new THREE.MeshBasicMaterial( {map: THREE.ImageUtils.loadTexture( 'gradient.png' ), side: THREE.BackSide , depthWrite: false}) );
+    dome.position.y = 500 - 94;
+
+    scene.add( ground );
+    scene.add( dome );
+	scene.add( plane );
+
+	scene.add( cursor );
+	scene.add( surfaceCursor );
+
+	onWindowResize();
+	
+}
+
+var s = 100;
+var substract = 12;
+
+function addSnowball( x, y, z, size ) {
+
+	operationsHistory.push( { type: 'ball', x: x, y: y, z: z, size: size } );
+
+}
+
+function addModel( brush, x, y, z, nx, ny, nz, scale ) {
+
+	var b = brush.clone();
+	operationsHistory.push( { 
+		type: 'object',
+		mesh: b, 
+		id: brush._modelId,
+		x: x, y: y, z: z, 
+		nx: nx, ny: ny, nz: nz,
+		scale: scale
+	} );
+	scene.add( b );
+	b.material.uniforms.tDiffuse.value.needsUpdate = true;
+	b.material.uniforms.tNormal.value.needsUpdate = true;
+	b.material.uniforms.tSpecular.value.needsUpdate = true;
+	b.material.uniforms.tMatCap.value.needsUpdate = true;
+	b.position.set( x, y, z );
+	b.scale.set( scale, scale, scale );
+	b.lookAt( new THREE.Vector3( nx, ny, nz ) );
+
+}
+
+function updateMesh() {
+
+	effect.reset();
+	effect.addPlaneY( .1, 0 );
+
+	if( snow ) scene.remove( snow );
+
+	for( var j in operationsHistory ) {
+		if( operationsHistory[ j ].type == 'ball' ) {
+			var ball = operationsHistory[ j ];
+			effect.addBall( ball.x, ball.y, ball.z, ball.size, substract );
+		}
+	}
+
+	var g = effect.generateGeometry();
+
+	var v, n = new THREE.Vector3( 0, 0, 0 ), nn;
+	for( var j = 0; j < g.vertices.length; j++ ) {
+		v = g.vertices[ j ];
+		n.set( v.x, v.y, v.z );
+		n.normalize();
+		s = 5;
+		nn = .025 * noise.noise( s * v.x, s * v.y, s * v.z );
+		v.add( n.multiplyScalar( nn ) );
+	}
+	
+	g.verticesNeedUpdate = true;
+    g.computeFaceNormals();
+
+ 	g.computeBoundingBox();
+
+	snow = new THREE.Mesh( g, snowMaterial );
+	snow.scale.set( 100, 100, 100 );
+	scene.add( snow );
+
+	nCenter.copy( snow.geometry.boundingBox.max );
+	nCenter.sub( snow.geometry.boundingBox.min );
+	nCenter.multiplyScalar( .5 );
+	nCenter.add( snow.geometry.boundingBox.min );
+	nCenter.multiplyScalar( 100 );
+
+}
+
+function onWindowResize() {
+	var s = 1;
+	renderer.setSize( s * window.innerWidth, s * window.innerHeight );
+	camera.projectionMatrix.makePerspective( fov, window.innerWidth / window.innerHeight, camera.near, camera.far );
+}
+
+function onMouseWheel( event ) {
+
+	// WebKit
+
+	var v = 0;
+	if ( event.wheelDeltaY ) {
+		v = event.wheelDeltaY * 0.001;
+	} else if ( event.wheelDelta ) {
+		v = event.wheelDelta * 0.005;
+	} else if ( event.detail ) {
+		v = event.detail * .1;
+	}
+
+	var d = 100;
+	if( event.shiftKey ) {
+		cursorSize += v;
+		track( 'Core', 'Size', 'Wheel' );
+	} else {
+		ndistance -= d * v;
+	}
+	
+}
+
+var onMouseDownMouseX = 0, onMouseDownMouseY = 0,
+lon = 180, onMouseDownLon = 0, nlat = 50,
+lat = 0, onMouseDownLat = 0, nlon = 0,
+phi = 0, theta = 0,
+isUserInteracting = false, hasMouseMoved = false,
+onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
+
+function onMouseDown( event ) {
+
+	event.preventDefault();
+
+	isUserInteracting = true;
+
+	onPointerDownPointerX = event.clientX;
+	onPointerDownPointerY = event.clientY;
+
+	onPointerDownLon = lon;
+	onPointerDownLat = lat;
+
+}
+
+var mouse = { x: 0, y: 0 }
+var projector;
+
+function onMouseMove( event ) {
+
+	if ( isUserInteracting ) {
+	
+		nlon = ( event.clientX - onPointerDownPointerX ) * 0.1 + onPointerDownLon;
+		nlat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
+		
+	}
+	
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+}
+
+function onMouseUp( event ) {
+	
+	isUserInteracting = false;
+	
+}
+
+var intersection = new THREE.Vector3( 0, 0, 0 ), intersectionNormal = new THREE.Vector3( 0, 0, 0 );
+var vector = new THREE.Vector3( 0, 0, 1 );
+var centerInc = new THREE.Vector3( 0, 0, 0 );
+
+function render() {
+
+	requestAnimationFrame( render );
+
+	if( ndistance < 90 ) ndistance = 90;
+	if( ndistance > 520 ) ndistance = 520;
+	if( cursorSize < .05 ) cursorSize = .05;
+
+	if( nlat < 5 ) nlat = 5;
+	nlat = Math.max( - 85, Math.min( 85, nlat ) );
+	
+	lat += ( nlat - lat ) * .1;
+	lon += ( nlon - lon ) * .1;
+
+	phi = ( 90 - lat ) * Math.PI / 180;
+	theta = lon * Math.PI / 180;
+
+	distance += ( ndistance - distance ) * .1;
+
+	centerInc.copy( nCenter );
+	centerInc.sub( center );
+	centerInc.multiplyScalar( .1 );
+	center.add( centerInc );
+
+	camera.position.x = center.x + distance * Math.sin( phi ) * Math.cos( theta );
+	camera.position.y = center.y + distance * Math.cos( phi );
+	camera.position.z = center.z + distance * Math.sin( phi ) * Math.sin( theta );
+
+	camera.lookAt( center );
+	
+	vector.set( mouse.x, mouse.y, 1 );
+	projector.unprojectVector( vector, camera );
+
+	raycaster.set( camera.position, vector.sub( camera.position ).normalize() );
+
+	var intersects = raycaster.intersectObjects( [ snow ] );
+
+	if ( intersects.length > 0 ) {
+		intersectionNormal.set( intersects[ 0 ].face.normal.x, intersects[ 0 ].face.normal.y, intersects[ 0 ].face.normal.z );
+		intersection.set( intersects[ 0 ].point.x, intersects[ 0 ].point.y, intersects[ 0 ].point.z );
+		intersectionNormal.add( intersection );
+		cursor.position.copy( intersects[ 0 ].point );
+		surfaceCursor.position.copy( intersects[ 0 ].point );
+		var cs = 50 * Math.sqrt( .1 * cursorSize / substract );
+		if( currentBrush ) {
+			currentBrush.position.copy( intersects[ 0 ].point );
+			currentBrush.scale.set( cursorSize, cursorSize, cursorSize );
+			currentBrush.lookAt( intersectionNormal );
+			currentBrush.visible = true;
+			cursor.scale.set( 10, 10, 10 );
+			cursor.visible = true;
+			surfaceCursor.visible = true;
+		} else {
+			cursor.scale.set( cs, cs, cs );
+			cursor.visible = true;
+			surfaceCursor.visible = true;
+		}
+	} else {
+		intersection.set( 0,0,0 );
+		cursor.visible = false;
+		surfaceCursor.visible = false;
+		if( currentBrush ) {
+			currentBrush.visible = false;
+		}
+	}
+
+	renderer.render( scene, camera );
+	if( debug ) rendererStats.update( renderer );
+	
+}
+
+</script>
+
+
+
+	</body>
+	</html>
+</html>

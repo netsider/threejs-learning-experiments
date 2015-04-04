@@ -1,0 +1,53 @@
+<html>
+	<head>
+		<title>My first Three.js app</title>
+		<style>canvas { width: 100%; height: 100% }</style>
+	</head>
+	<body>
+
+		<button onclick="zoomout()">Zoom out</button>
+		<button onclick="zoomin()">Zoom In</button>
+		Change X Axis Rotation Speed<button onclick="zoomin()"></button>
+		
+		<script src="http://threejs.org/build/three.min.js"></script>
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			var geometry = new THREE.CubeGeometry(1,2,1);
+			var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+			var cube = new THREE.Mesh(geometry, material);
+			scene.add(cube);
+			
+			var zindex = 7; // default z-index (camera distance)
+			camera.position.z = zindex;
+
+			var zoomout = function () 
+			{ 
+			camera.position.z = camera.position.z + 1;
+			}
+			
+			var zoomin = function () 
+			{ 
+			camera.position.z = camera.position.z - 1;
+			}
+			
+			
+			
+			var render = function () 
+			{
+				requestAnimationFrame(render);
+				renderer.render(scene, camera);
+				cube.rotation.x += 0.2;
+				cube.rotation.y += 0.0;
+			};
+
+			render();
+			
+		</script>
+	</body>
+</html>

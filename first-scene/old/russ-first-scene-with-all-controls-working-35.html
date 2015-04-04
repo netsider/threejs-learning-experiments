@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+ <head> 
+  <title>Example 09.01 - Basic animations</title> 
+  <meta charset="utf8">
+  <script type="text/javascript" src="three.js"></script> 
+  <script type="text/javascript" src="jquery-1.9.0.js"></script> 
+  <script type="text/javascript" src="stats.js"></script> 
+  <script type="text/javascript" src="dat.gui.js"></script> 
+  <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style> 
+ </head> 
+ <body> 
+  <div id="Stats-output"> 
+  </div> 
+  <!-- Div which will hold the Output --> 
+  <div id="WebGL-output"> 
+  </div> 
+  <!-- Javascript code that runs our Three.js examples --> 
+  <script type="text/javascript">
+   $(function () {
+     var stats = initStats(); // Initialize/Call iniStats();
+     var scene = new THREE.Scene(); //Create new ThreeJS scene
+	 var targetList = [];
+	 document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+
+		 // create a camera, which defines where we're looking at.
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+		
+		// initialize object to perform world/screen calculations
+		projector = new THREE.Projector();
+		
+		// create a render and set the size
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+		
+			// SKYBOX/FOG
+			var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+			var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+			var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+			scene.add(skyBox);
+		
+		 // Moving Sphere
+		var step = 0; var invert = 1;	var phase = 0; // used to determine the switch point for the light animation
+		var stopMovingLight = false; // Set Default
+		var sphereLight = new THREE.SphereGeometry(10.0);
+		var sphereLightMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+		sphereLightMaterial.map = THREE.ImageUtils.loadTexture('earthmap1k.jpg'); // Diffuse Mapping (Regular)
+		sphereLightMaterial.bumpMap = THREE.ImageUtils.loadTexture('earthmapbumpbw.jpg'); // Applies and uses Texture for Bump Mapping
+		sphereLightMaterial.bumpScale = 0.01; // Amount of Bumps Produced by earthbump1k.jpg
+		sphereLightMaterial.specularMap    = THREE.ImageUtils.loadTexture('earthspec1k.jpg'); // Adds Specular (Shiny) Map
+		sphereLightMaterial.specular  = new THREE.Color('grey');
+		var sphereLightMesh = new THREE.Mesh(sphereLight, sphereLightMaterial);
+		sphereLightMesh.castShadow = true;
+		sphereLightMesh.position = new THREE.Vector3(3, 10, 3);
+		scene.add(sphereLightMesh);
+			
+		targetList.push(sphereLightMesh); // For Raycaster/MouseDown
+		
+		//Directional Light
+		var directionalLight = new THREE.DirectionalLight( 0xffffff, 10.7 );
+		dpos = sphereLightMesh.position;
+        directionalLight.position.set(dpos);
+		 directionalLight.target.position.set(plane);
+		directionalLight.shadowCameraVisible = 1;
+        scene.add(directionalLight);
+		
+		
+		//PLANE
+        var planeGeometry = new THREE.PlaneGeometry(60,20,1,1);
+        //var planeMaterial =    new THREE.MeshLambertMaterial({color: 0xffffff});
+        //var planeMaterial = new THREE.MeshPhongMaterial({color: "green"});
+		var planeMaterial = new THREE.MeshPhongMaterial( { 
+			map: THREE.ImageUtils.loadTexture('./tex/clover.jpg'),
+			color: 0xffffff,
+			shininess: 10,
+			combine: THREE.MixOperation,
+			reflectivity: 0.05
+		} );
+		planeMaterial.bumpScale = 1.0; // Amount of Bumps Produced by earthbump1k.jpg
+		planeMaterial.map.wrapS = planeMaterial.map.wrapT = THREE.RepeatWrapping;
+		planeMaterial.map.repeat.set(1, 1);
+		planeMaterial.bumpMap = THREE.ImageUtils.loadTexture('./tex/cloverbw.jpg'); // Applies and uses Texture for Bump Mapping
+        var plane = new THREE.Mesh(planeGeometry,planeMaterial);
+        plane.receiveShadow  = true;
+        plane.rotation.x=-0.5*Math.PI;
+        plane.position.x=15;
+        plane.position.y=0;
+        plane.position.z=0;
+		scene.add(plane);
+		
+		//Custom Geometry	
+		var geometry = new THREE.Geometry();
+		geometry.vertices.push( // Vertices for the Geometry
+			new THREE.Vector3( -25,  10, 0 ),
+			new THREE.Vector3( -15.5, -10, 0 ),
+			new THREE.Vector3(  -10, 10, 0 ),
+			new THREE.Vector3( -50,  50, 10)
+			//new THREE.Vector3( 12, -10, 10 ),
+			//new THREE.Vector3(  35, 10, 10 )
+		);
+		geometry.faces.push( new THREE.Face3( 0, 1, 2, 3 ) ); // Faces must be equal to number of vectors just listed
+		geometry.computeFaceNormals();
+		//geometry.computeBoundingSphere();
+		material = new THREE.MeshBasicMaterial( { color: "red", wireframe: false } );
+		mesh = new THREE.Mesh( geometry, material );
+		scene.add( mesh );
+		var vertices = geometry.vertices;
+		var holes = [];
+		var triangles, mesh;
+		geometry.vertices = vertices;
+		triangles = THREE.Shape.Utils.triangulateShape ( vertices, holes );
+		for( var i = 0; i < triangles.length; i++ ){ 
+		geometry.faces.push( new THREE.Face3( triangles[i][0], triangles[i][1], triangles[i][2] )); // Compute/Find The Faces
+		}
+		newmesh = new THREE.Mesh( geometry, material );
+		console.log(JSON.stringify(newmesh.geometry.faces));
+		scene.add(newmesh);
+		
+		
+		// CUBE
+        var cubeGeometry = new THREE.CubeGeometry(4, 4, 4);
+       // var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+		 //var cubeMaterial = new THREE.MeshPhongMaterial({color: "red"});
+		 var cubeMaterial = new THREE.MeshPhongMaterial( { map: THREE.ImageUtils.loadTexture('plywood.jpg') } );
+        var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.position.x = 1;
+        cube.position.y = 20;
+        cube.position.z = 0;
+		 scene.add(cube);
+		 
+	//Red Cube
+		var cubeMaterial = new THREE.MeshLambertMaterial({color: 'red', transparent:true, opacity:0.6});
+         var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
+        var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+		var cubeMaterial = new THREE.MeshPhongMaterial({color: "red"});
+		 var cubeMaterial = new THREE.MeshPhongMaterial( { map: THREE.ImageUtils.loadTexture('plywood.jpg') } );
+        var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.position.x = 10;
+        cube.position.y = 30;
+        cube.position.z = 10;
+		 scene.add(cube); 
+	
+		 //SCENE LIGHT
+		var spotLight0 = new THREE.SpotLight(0xcccccc);
+		spotLight0.position.set(-40, 60, -10);
+		spotLight0.lookAt(mesh);
+		scene.add(spotLight0);
+		
+		//Ambient Light
+        var ambientLight = new THREE.AmbientLight(0x292929);
+        scene.add(ambientLight);
+		
+			//MISC
+			var clock = new THREE.Clock();
+		
+			//Blender Animation
+			var loader = new THREE.JSONLoader();
+			loader.load('hand-2.js', function (geometry, mat) {
+            // register the animation
+            THREE.AnimationHandler.add(geometry.animation);
+            // create a material
+            var mat = new THREE.MeshLambertMaterial({color: 0xF0C8C9, skinning: true});
+            // create and position the mesh
+            mesh = new THREE.SkinnedMesh(geometry, mat);
+            mesh.rotation.x = 0.5 * Math.PI;
+            mesh.rotation.z = 0.7 * Math.PI;
+			mesh.scale.x = 10;
+			mesh.scale.y = 10;
+			mesh.position.y = 10;
+			mesh.position.x = 15;
+            scene.add(mesh);
+            // create the animation
+            var animation = new THREE.Animation(mesh, "wave");
+            // start the animation
+            animation.play();
+        }, '../assets/models');
+	
+	     // position and point the camera to the center of the scene
+        camera.position.x = -30;
+        camera.position.y = 40;
+        camera.position.z = -30;
+        camera.lookAt(scene.position);
+	 
+		// add the output of the renderer to the html element
+        $("#WebGL-output").append(renderer.domElement);
+
+		var controls = new function () { // Defaults for Function Below it
+			this.Highlight = 0.5;
+			this.bumpScale = 0.15;
+			this.EarthBump = 0.15;
+			this.rotationSpeed = 0.02;
+			this.ambientColor = 0x292929;
+			this.color = cubeMaterial.color.getStyle();
+			this.positionX = 1;
+			this.positionY = 1;
+			this.positionZ = 1;
+			this.scaleX = 1;
+            this.scaleY = 1;
+            this.scaleZ = 1;
+			this.test = .5;
+			this.planecolor = 0x292929;
+			this.stopMovingLight = false;
+			this.EarthSpeed = .03;
+			this.updateBump = function (e) {
+                console.log(plane.material.bumpScale);
+                plane.material.bumpScale = e;
+            }
+			this.updateEarthBump = function (e) {
+                console.log(sphereLightMesh.material.bumpScale);
+                sphereLightMesh.material.bumpScale = e;
+            }
+        }
+
+        var gui = new dat.GUI();
+        
+		    gui.addColor(controls, 'ambientColor').onChange(function (e) {
+            ambientLight.color = new THREE.Color(e);// Colorpicker Menu Item
+        });
+		    gui.addColor(controls, 'color').onChange(function (e) { 
+            cubeMaterial.color = new THREE.Color(e);// Colorpicker Menu Item
+        });
+		    gui.addColor(controls, 'planecolor').onChange(function (e) { 
+            planeMaterial.color = new THREE.Color(e);// Colorpicker Menu Item
+        });
+		
+	        guiPosition = gui.addFolder('position'); // Position Menu Item
+        var contX = guiPosition.add(controls,'positionX',-10,10);
+        var contY = guiPosition.add(controls,'positionY',-4,20);
+        var contZ = guiPosition.add(controls,'positionZ',-10,10);
+
+        contX.listen();
+        contX.onChange(function(value) {
+        cube.position.x=controls.positionX;// Changes Cube Position
+        });
+
+        contY.listen();
+        contY.onChange(function(value) {
+            cube.position.y=controls.positionY;// Changes Cube Position
+        });
+
+        contZ.listen();
+        contZ.onChange(function(value) {
+        cube.position.z=controls.positionZ; // Changes Cube Position
+        });
+		
+		guiScale = gui.addFolder('scale'); // Scale Menu 
+		guiScale.add(controls,'scaleX',0,5);
+		guiScale.add(controls,'scaleY',0,5);
+		guiScale.add(controls,'scaleZ',0,5);
+		
+		gui.add(controls, 'rotationSpeed', 0, 1.5);
+		gui.add(controls, 'EarthSpeed',  0, .75);
+		gui.add(controls, "bumpScale", -2, 2.5).onChange(controls.updateBump);
+		gui.add(controls, "EarthBump", -2, 2).onChange(controls.updateEarthBump);
+		gui.add(controls, "Highlight", -1, 1);
+
+		
+        render();
+		
+	function render() {
+			stats.update();			
+			
+			cube.rotation.x += controls.rotationSpeed;
+			cube.rotation.y += controls.rotationSpeed;
+			cube.rotation.z += controls.rotationSpeed;
+			cube.scale.set(controls.scaleX,controls.scaleY,controls.scaleZ); // Scales Cube
+			
+			        if (!stopMovingLight) {
+            if (phase > 2 * Math.PI) {
+                invert = invert * -1;
+                phase -= 2 * Math.PI;
+            } else {
+                phase += controls.EarthSpeed;
+            }
+            sphereLightMesh.position.z = +(7 * (Math.sin(phase)));
+            sphereLightMesh.position.x = +(14 * (Math.cos(phase)));
+
+            if (invert < 0) {
+                var pivot = 14;
+                sphereLightMesh.position.x = (invert * (sphereLightMesh.position.x - pivot)) + pivot;
+            }
+
+            //spotLight0.position = sphereLightMesh.position;
+        }
+		
+		var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xff0000, side: THREE.BackSide } );
+		var outlineMesh1 = new THREE.Mesh( sphereLight, outlineMaterial1 );
+		outlineMesh1.position = sphereLightMesh.position;
+		outlineMesh1.Highlight = 1.15;
+		outlineMesh1.scale.multiplyScalar(outlineMesh1.Highlight);
+		scene.add( outlineMesh1 );
+		
+			//cube.position = sphereLightMesh.position; // Make Cube Follow Spehere
+			
+		 var delta = clock.getDelta(); //Clock for Blender AnimationHandler
+         THREE.AnimationHandler.update(delta); // Updating the Blender Animation
+        
+			requestAnimationFrame(render);
+			renderer.render(scene, camera);
+    }
+	
+  function initStats() {
+            var stats = new Stats();
+            stats.setMode(0); // 0: fps, 1: ms
+
+            // Align top-left
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+            $("#Stats-output").append(stats.domElement);
+            return stats;
+ }
+		
+function createMesh(geom) {
+            // assign two materials
+            var meshMaterial = new THREE.MeshNormalMaterial();
+            meshMaterial.side = THREE.DoubleSide;
+            var wireFrameMat = new THREE.MeshBasicMaterial();
+            wireFrameMat.wireframe = true;
+            // create a multimaterial
+            var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
+            return mesh;
+        };
+		
+function onDocumentMouseDown( event ) //Mouseclick/Raycaster Function
+{
+	// the following line would stop any other event handler from firing
+	// (such as the mouse's TrackballControls)
+	// event.preventDefault();
+	
+	console.log("Click.");
+	var mouse = { x: 0, y: 0 };
+	// update the mouse variable
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+	
+	// find intersections
+	// create a Ray with origin at the mouse position
+	//   and direction into the scene (camera direction)
+	var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
+	projector.unprojectVector( vector, camera );
+	var ray = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+	// create an array containing all objects in the scene with which the ray intersects
+	var intersects = ray.intersectObjects( targetList );
+	
+		// if there is one (or more) intersections
+		if ( intersects.length > 0 )
+		{
+			console.log("Hit @ " + toString( intersects[0].point ) );
+			var toggleGlow;
+			if (toggleGlow === 1){
+			
+				toggleGlow = 0;
+			}
+			// change the color of the closest face.
+			//intersects[ 0 ].face.color.setRGB( 0.8 * Math.random() + 0.2, 0, 0 ); 
+			//intersects[ 0 ].object.geometry.colorsNeedUpdate = true;
+		}
+};
+	
+   });
+</script>  
+ </body>
+</html>
