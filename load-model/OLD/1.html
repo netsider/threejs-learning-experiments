@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
  <head> 
+ <meta charset="UTF8">
   <title>Example 08.05 - Load blender model </title> 
   <script type="text/javascript" src="three.js"></script> 
   <script type="text/javascript" src="jquery-1.9.0.js"></script> 
   <script type="text/javascript" src="stats.js"></script> 
   <script type="text/javascript" src="dat.gui.js"></script> 
+  <script type="text/javascript" src="stats2.js"></script> 
   <style>
         body {
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -13,7 +15,6 @@
             overflow: hidden;
         }
     </style> 
-
  </head> 
  <body> 
   <div id="Stats-output"> 
@@ -25,7 +26,7 @@
   <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
-    $(function () {
+	$(function () {
 
         var stats = initStats();
 
@@ -74,15 +75,17 @@
         var loader = new THREE.JSONLoader();
         loader.load('ChickenCoop.js', function (geometry, mat) {
             mesh = new THREE.Mesh(geometry, mat[0]);
+			console.log[mat[0]];
 
             mesh.scale.x = 8;
             mesh.scale.y = 8;
             mesh.scale.z = 8;
+			mesh.material.side = THREE.DoubleSide;
 
             scene.add(mesh);
 
         }, '/');
-
+		
 
         render();
 
@@ -114,6 +117,8 @@
 
             return stats;
         }
+		
+
     });
 
 
